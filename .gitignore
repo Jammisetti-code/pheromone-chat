@@ -1,0 +1,15 @@
+# node/npm artefacts
+node_modules/
+.next/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Fly build cache
+dist/
