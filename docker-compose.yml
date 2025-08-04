@@ -1,12 +1,14 @@
-version: "3.9"
 
 services:
+  # ──────────────────────────────
+  # Django + Channels (backend)
+  # ──────────────────────────────
   web:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"            # http://localhost:8000
+      - "8000:8000"               # http://localhost:8000
     environment:
       DB_NAME: postgres
       DB_USER: postgres
@@ -15,11 +17,32 @@ services:
       DB_PORT: 5432
       REDIS_HOST: redis
     volumes:
-      - ./backend:/app/backend   # hot-reload on code edits
+      - ./backend:/app/backend    # live-reload on code edits
     depends_on:
       - db
       - redis
 
+  # ──────────────────────────────
+  # Nuxt 3 SSR (frontend)
+  # ──────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev   # the file above
+    ports:
+      - "3000:3000"
+    environment:
+      NUXT_PUBLIC_API_URL: http://web:8000
+    volumes:
+      # mount source, but keep node_modules from the image
+      - ./frontend:/app:rw,delegated
+      - /app/node_modules          # anonymous volume, preserves deps
+    depends_on:
+      - web
+
+  # ──────────────────────────────
+  # Postgres database
+  # ──────────────────────────────
   db:
     image: postgres:16
     environment:
@@ -27,8 +50,11 @@ services:
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"            # pgAdmin or psql can connect via localhost
+      - "5432:5432"
 
+  # ──────────────────────────────
+  # Redis for Channels + caches
+  # ──────────────────────────────
   redis:
     image: redis:7
     ports:

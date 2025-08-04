@@ -1,6 +1,6 @@
 # node/npm artefacts
 node_modules/
-.next/
+.nuxt/
 
 # Python
 __pycache__/
